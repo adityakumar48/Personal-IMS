@@ -1,14 +1,29 @@
 import express from "express";
 import userRoutes from "./routes/userRoutes";
+import cluster from "cluster";
+import * as os from "os";
 
-const app = express();
-const PORT = 8000 || process.env.PORT;
+const cpuNums = os.cpus().length;
+console.log("Cpu Cores:- ", cpuNums);
 
-app.use(express.json());
+if (cluster.isPrimary) {
+  for (let i = 0; i < cpuNums; i++) {
+    cluster.fork();
+  }
 
-// Routes
-app.use("/users", userRoutes);
+  cluster.on("exit", () => {
+    cluster.fork();
+  });
+} else {
+  const app = express();
+  const PORT = 8000 || process.env.PORT;
 
-app.listen(PORT, () => {
-  console.log(`Server is running on port ${PORT} 🔥`);
-});
+  app.use(express.json());
+
+  // Routes
+  app.use("/users", userRoutes);
+
+  app.listen(PORT, () => {
+    console.log(`Server is running on port ${PORT} 🔥`);
+  });
+}
