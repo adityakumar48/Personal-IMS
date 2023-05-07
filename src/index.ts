@@ -1,5 +1,7 @@
 import express from "express";
+
 import userRoutes from "./routes/userRoutes";
+import authRoutes from "./routes/authRoutes";
 import cluster from "cluster";
 import * as os from "os";
 
@@ -22,6 +24,7 @@ if (cluster.isPrimary) {
 
   // Routes
   app.use("/users", userRoutes);
+  app.use("/auth", authRoutes);
 
   app.listen(PORT, () => {
     console.log(`Server is running on port ${PORT} 🔥`);
